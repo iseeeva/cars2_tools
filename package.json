@@ -1,0 +1,12 @@
+{
+  "name": "cars2_tools",
+  "version": "1.0.0",
+  "description": "Cars 2 Tools",
+  "main": "",
+  "scripts": {},
+  "author": "iseeeva",
+  "license": "ISC",
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
+}
