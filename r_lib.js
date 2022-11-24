@@ -44,6 +44,17 @@ function float_to_hex(float) {
     return endian(result);
 }
 
+function int_to_hex16(int) {
+    const getHex = i => ('00' + i.toString(16)).slice(-2);
+    var view = new DataView(new ArrayBuffer(2)),
+        result;
+    view.setInt16(0, int);
+    result = Array.apply(null, {
+        length: 2
+    }).map((_, i) => getHex(view.getUint8(i))).join('');
+    return endian(result);
+}
+
 function float16_to_float(h) {
     var s = (h & 0x8000) >> 15;
     var e = (h & 0x7C00) >> 10;
@@ -63,5 +74,6 @@ module.exports = {
 	readHex,
 	endian,
 	float_to_hex,
-	float16_to_float
+	float16_to_float,
+	int_to_hex16
 }
