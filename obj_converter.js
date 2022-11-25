@@ -19,44 +19,51 @@ let ibuf_build_name = `${(process.argv[2]).substr(0, (process.argv[2]).lastIndex
 fs.writeFileSync(vbuf_build_name,"");
 fs.writeFileSync(ibuf_build_name,"");
 
+let vertex = [], uv = [], index = [];
+let calc_vsize = 0, calc_isize = 0;
+
 output['models'].forEach((models) => {
 	
 	console.log("[MODEL]", models["name"])
 	;(async () => {
-		console.log("[VERTEX]", fs.readFileSync(vbuf_build_name).length)
 		models["vertices"].forEach((xyz) => {
-			fs.appendFileSync(vbuf_build_name,float_to_hex(xyz.x));
-			fs.appendFileSync(vbuf_build_name,float_to_hex(xyz.y));
-			fs.appendFileSync(vbuf_build_name,float_to_hex(xyz.z));
-		    fs.appendFileSync(vbuf_build_name, Buffer.from("00000000","hex")); //fake bone indices
-		    fs.appendFileSync(vbuf_build_name, Buffer.from("FF000000","hex")); //fake bone weight
+			vertex.push(float_to_hex(xyz.x));
+			vertex.push(float_to_hex(xyz.y));
+			vertex.push(float_to_hex(xyz.z));
+		    vertex.push(Buffer.from("00000000","hex")); //fake bone indices
+		    vertex.push(Buffer.from("FF000000","hex")); //fake bone weight
 			// console.log("ver:",xyz.x,xyz.y,xyz.z)
 		})
-		console.log("[VERTEX_F]", models["vertices"].length)
+		calc_vsize += models["vertices"].length * 20;
+		console.log("[VERTEX]", calc_vsize - (models["vertices"].length * 20), "[VERTEX_F]", models["vertices"].length)
 	})()
 	
 	;(async () => {
-		console.log("[UV]",fs.readFileSync(vbuf_build_name).length)
-		models["textureCoords"].forEach((uv) => {
-			fs.appendFileSync(vbuf_build_name,float_to_hex(uv.u));
-			fs.appendFileSync(vbuf_build_name,float_to_hex(uv.v));
-			// fs.appendFileSync(vbuf_build_name,float_to_hex(uv.w));
+		models["textureCoords"].forEach((xyz) => {
+			uv.push(float_to_hex(xyz.u));
+			uv.push(float_to_hex(xyz.v));
 			// console.log("uv:",uv.u,uv.v,uv.w)
 		})
-		console.log("[UV_F]", models["textureCoords"].length)
+		calc_vsize += models["textureCoords"].length * 8;
+		console.log("[UV]", calc_vsize - (models["textureCoords"].length * 8), "[UV_F]", models["textureCoords"].length)
 	})()
 	
 	;(async () => {
-		console.log("[FACE]",fs.readFileSync(ibuf_build_name).length)
 		models["faces"].forEach((faces) => {
 			faces["vertices"].forEach((xyz) => {
-				fs.appendFileSync(ibuf_build_name,int_to_hex16(xyz.vertexIndex - 1));
-				// fs.appendFileSync(ibuf_build_name,int_to_hex16(xyz.textureCoordsIndex));
-				// fs.appendFileSync(ibuf_build_name,int_to_hex16(xyz.vertexNormalIndex));
+				index.push(int_to_hex16(xyz.vertexIndex - 1));
 			// console.log("faces:",xyz.vertexIndex,xyz.textureCoordsIndex,xyz.vertexNormalIndex)
 			})
 		})
-		console.log("[FACE_F]", models["faces"].length, "\n")
+		calc_isize += models["faces"].length * 6;
+		console.log("[FACE]", calc_isize - (models["faces"].length * 6), "[FACE_F]", models["faces"].length, "\n")
 	})()
 
 })
+
+console.log("[VERTEX]", vertex.length/5, "[UV]", (vertex.length/5)*20, uv.length/2, "[FACE]", index.length/3);
+vertex.forEach((vertex) => {fs.appendFileSync(vbuf_build_name,vertex);})
+uv.forEach((uv) => {fs.appendFileSync(vbuf_build_name,uv);})
+index.forEach((index) => {fs.appendFileSync(ibuf_build_name,index);})
+
+console.log(vbuf_build_name,ibuf_build_name,"finished")
