@@ -85,8 +85,12 @@ for(var i=0; i < calc_vsize_array.length; i++){
 
 console.log("[VERTEX]", total_vertex, "[UV]", calc_vsize_total, total_uv, "[FACE]", total_index);
 
-vertex.forEach((vertex) => {fs.appendFileSync(vbuf_build_name,vertex);})
-uv.forEach((uv) => {fs.appendFileSync(vbuf_build_name,uv);})
-index.forEach((index) => {fs.appendFileSync(ibuf_build_name,index);})
+let vbuf_stream = fs.createWriteStream(vbuf_build_name, {flags: "a",mode: 0744});
+let ibuf_stream = fs.createWriteStream(ibuf_build_name, {flags: "a",mode: 0744});
+
+vertex.forEach(async(vertex) => {await vbuf_stream.write(vertex);})
+uv.forEach(async(uv) => {await vbuf_stream.write(uv);})
+index.forEach(async(index) => {await ibuf_stream.write(index);})
+vbuf_stream.end();ibuf_stream.end();
 
 console.log(vbuf_build_name,ibuf_build_name,"finished")
